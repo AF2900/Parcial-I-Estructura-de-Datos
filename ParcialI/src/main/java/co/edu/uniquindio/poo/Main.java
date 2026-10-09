@@ -7,6 +7,8 @@ public class Main {
 
     public static void main(String[] args) {
 
+
+
         Paquete paquete1 = new Paquete(
                 "PQ731",
                 "Armenia",
@@ -22,6 +24,15 @@ public class Main {
                 4,
                 25
         );
+
+        Paquete paquete3 = new Paquete(
+                "PQ942",
+                "Calarca",
+                6.7,
+                35
+        );
+
+        System.out.println(paquete3);
 
         Repartidor repartidor1 = new Repartidor(
                 "R001",
