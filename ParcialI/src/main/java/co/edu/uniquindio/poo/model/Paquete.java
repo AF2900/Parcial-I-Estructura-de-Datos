@@ -18,6 +18,12 @@ public class Paquete implements Comparable<Paquete> {
         this.tiempoEstimado = tiempoEstimado;
     }
 
+    public Paquete(String codigo, String destino, double peso,
+                   int tiempoEstimado) {
+
+        this(codigo, destino, peso, 5, tiempoEstimado);
+    }
+
     public String getCodigo() {
         return codigo;
     }
