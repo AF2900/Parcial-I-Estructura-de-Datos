@@ -1,8 +1,12 @@
 package co.edu.uniquindio.poo.service;
 
 import co.edu.uniquindio.poo.comparadores.ComparadorDespacho;
+import co.edu.uniquindio.poo.comparadores.ComparadorPeso;
+import co.edu.uniquindio.poo.comparadores.ComparadorPrioridad;
+import co.edu.uniquindio.poo.comparadores.ComparadorTiempo;
 import co.edu.uniquindio.poo.model.Paquete;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -10,12 +14,22 @@ public class GestorPrioridad {
 
     private final PriorityQueue<Paquete> colaPrioridad;
 
+
     public GestorPrioridad() {
-        colaPrioridad = new PriorityQueue<>(new ComparadorDespacho());
+
+        colaPrioridad =
+                new PriorityQueue<>(
+                        new ComparadorDespacho()
+                );
     }
 
-    // Agrega un paquete a la cola de prioridad.
+
+    // ---------------------------------------------------------
+    // COLA DE PRIORIDAD
+    // ---------------------------------------------------------
+
     public void agregarPaquete(Paquete paquete) {
+
         if (paquete == null) {
             throw new IllegalArgumentException(
                     "El paquete no puede ser null."
@@ -25,81 +39,247 @@ public class GestorPrioridad {
         colaPrioridad.offer(paquete);
     }
 
-    // Consulta el siguiente paquete sin retirarlo.
+
     public Paquete verSiguientePaquete() {
+
         return colaPrioridad.peek();
     }
 
-    // Retira y devuelve el siguiente paquete.
+
     public Paquete despacharSiguientePaquete() {
+
         return colaPrioridad.poll();
     }
 
+
+    /*
+     * Permite eliminar un paquete concreto de la cola.
+     *
+     * Será necesario durante la integración cuando un paquete
+     * sea procesado por otra modalidad y deba desaparecer
+     * también de esta estructura.
+     *
+     * PriorityQueue.remove(Object) tiene costo O(n).
+     */
+    public boolean eliminarPaquete(
+            Paquete paquete) {
+
+        if (paquete == null) {
+            return false;
+        }
+
+        return colaPrioridad.remove(paquete);
+    }
+
+
+    public boolean contienePaquete(
+            Paquete paquete) {
+
+        if (paquete == null) {
+            return false;
+        }
+
+        return colaPrioridad.contains(paquete);
+    }
+
+
     public boolean estaVacia() {
+
         return colaPrioridad.isEmpty();
     }
 
+
     public int cantidadPaquetes() {
+
         return colaPrioridad.size();
     }
 
-    // Devuelve los paquetes ordenados sin modificar la cola original.
-    public List<Paquete> obtenerPaquetesEnOrdenDespacho() {
-        PriorityQueue<Paquete> copia =
-                new PriorityQueue<>(colaPrioridad);
 
-        List<Paquete> resultado = new ArrayList<>();
+    /*
+     * Devuelve los paquetes en el orden real de despacho,
+     * pero sin modificar la PriorityQueue original.
+     */
+    public List<Paquete> obtenerPaquetesEnOrdenDespacho() {
+
+        PriorityQueue<Paquete> copia =
+                new PriorityQueue<>(
+                        colaPrioridad
+                );
+
+        List<Paquete> resultado =
+                new ArrayList<>();
 
         while (!copia.isEmpty()) {
-            resultado.add(copia.poll());
+
+            resultado.add(
+                    copia.poll()
+            );
         }
 
         return resultado;
     }
 
-    // Suma recursivamente el peso de los paquetes de un destino.
+
+    // ---------------------------------------------------------
+    // ORDENAMIENTOS ALTERNATIVOS
+    // ---------------------------------------------------------
+
+    /*
+     * Devuelve una copia ordenada por prioridad
+     * de mayor a menor.
+     */
+    public List<Paquete> ordenarPorPrioridad(
+            List<Paquete> paquetes) {
+
+        if (paquetes == null) {
+            return new ArrayList<>();
+        }
+
+        List<Paquete> copia =
+                new ArrayList<>(paquetes);
+
+        copia.sort(
+                new ComparadorPrioridad()
+        );
+
+        return copia;
+    }
+
+
+    /*
+     * Devuelve una copia ordenada por peso
+     * de mayor a menor.
+     */
+    public List<Paquete> ordenarPorPeso(
+            List<Paquete> paquetes) {
+
+        if (paquetes == null) {
+            return new ArrayList<>();
+        }
+
+        List<Paquete> copia =
+                new ArrayList<>(paquetes);
+
+        copia.sort(
+                new ComparadorPeso()
+        );
+
+        return copia;
+    }
+
+
+    /*
+     * Devuelve una copia ordenada por tiempo estimado
+     * de menor a mayor.
+     */
+    public List<Paquete> ordenarPorTiempo(
+            List<Paquete> paquetes) {
+
+        if (paquetes == null) {
+            return new ArrayList<>();
+        }
+
+        List<Paquete> copia =
+                new ArrayList<>(paquetes);
+
+        copia.sort(
+                new ComparadorTiempo()
+        );
+
+        return copia;
+    }
+
+
+    /*
+     * Utiliza el orden natural de Paquete.
+     *
+     * Paquete implementa Comparable<Paquete>
+     * y su orden natural es por código ascendente.
+     */
+    public List<Paquete> ordenarPorCodigo(
+            List<Paquete> paquetes) {
+
+        if (paquetes == null) {
+            return new ArrayList<>();
+        }
+
+        List<Paquete> copia =
+                new ArrayList<>(paquetes);
+
+        Collections.sort(copia);
+
+        return copia;
+    }
+
+
+    // ---------------------------------------------------------
+    // RECURSIVIDAD:
+    // PESO TOTAL POR MUNICIPIO
+    // ---------------------------------------------------------
+
     public double calcularPesoPorDestino(
             List<Paquete> paquetes,
             String destino) {
 
-        if (paquetes == null || destino == null) {
+        if (paquetes == null ||
+                destino == null ||
+                destino.trim().isEmpty()) {
+
             return 0.0;
         }
 
         return calcularPesoPorDestinoRecursivo(
-                paquetes, destino.trim(), 0
+                paquetes,
+                destino.trim(),
+                0
         );
     }
+
 
     private double calcularPesoPorDestinoRecursivo(
             List<Paquete> paquetes,
             String destino,
             int indice) {
 
+        /*
+         * Caso base:
+         * se llegó al final de la lista.
+         */
         if (indice >= paquetes.size()) {
             return 0.0;
         }
 
-        Paquete paquete = paquetes.get(indice);
+        Paquete paquete =
+                paquetes.get(indice);
 
         double pesoActual = 0.0;
 
-        if (paquete != null
-                && paquete.getDestino() != null
-                && paquete.getDestino().trim()
+        if (paquete.getDestino()
                 .equalsIgnoreCase(destino)) {
 
-            pesoActual = paquete.getPeso();
+            pesoActual =
+                    paquete.getPeso();
         }
 
+        /*
+         * Caso recursivo:
+         * procesa el elemento actual y continúa
+         * con la siguiente posición.
+         */
         return pesoActual
                 + calcularPesoPorDestinoRecursivo(
-                paquetes, destino, indice + 1
+                paquetes,
+                destino,
+                indice + 1
         );
     }
 
-    // Cuenta recursivamente los paquetes con prioridad
-    // mayor o igual al umbral indicado.
+
+    // ---------------------------------------------------------
+    // RECURSIVIDAD:
+    // CONTAR PRIORIDAD MÍNIMA
+    // ---------------------------------------------------------
+
     public int contarPaquetesPorPrioridad(
             List<Paquete> paquetes,
             int prioridadMinima) {
@@ -109,121 +289,223 @@ public class GestorPrioridad {
         }
 
         return contarPaquetesRecursivo(
-                paquetes, prioridadMinima, 0
+                paquetes,
+                prioridadMinima,
+                0
         );
     }
+
 
     private int contarPaquetesRecursivo(
             List<Paquete> paquetes,
             int prioridadMinima,
             int indice) {
 
+        /*
+         * Caso base:
+         * se llegó al final de la lista.
+         */
         if (indice >= paquetes.size()) {
             return 0;
         }
 
-        Paquete paquete = paquetes.get(indice);
+        Paquete paquete =
+                paquetes.get(indice);
 
         int cuentaActual = 0;
 
-        if (paquete != null
-                && paquete.getPrioridad() >= prioridadMinima) {
+        if (paquete.getPrioridad()
+                >= prioridadMinima) {
+
             cuentaActual = 1;
         }
 
+        /*
+         * Caso recursivo.
+         */
         return cuentaActual
                 + contarPaquetesRecursivo(
-                paquetes, prioridadMinima, indice + 1
+                paquetes,
+                prioridadMinima,
+                indice + 1
         );
     }
 
-    // Busca un paquete por código mediante búsqueda binaria.
-    // Precondición: la lista ya debe estar ordenada por código
-    // ascendente y no debe contener paquetes ni códigos nulos.
-    // Complejidad: O(log n) comparaciones.
-    public Paquete buscarPaquetePorCodigo(
-            List<Paquete> paquetesOrdenados, String codigo) {
 
-        if (paquetesOrdenados == null || codigo == null) {
+    // ---------------------------------------------------------
+    // BÚSQUEDA BINARIA RECURSIVA
+    // ---------------------------------------------------------
+
+    /*
+     * PRECONDICIÓN:
+     *
+     * La lista recibida debe encontrarse ordenada
+     * ascendentemente por código.
+     *
+     * Para obtenerla puede utilizarse:
+     *
+     * ordenarPorCodigo(lista)
+     */
+    public Paquete buscarPaquetePorCodigo(
+            List<Paquete> paquetesOrdenados,
+            String codigo) {
+
+        if (paquetesOrdenados == null ||
+                codigo == null ||
+                codigo.trim().isEmpty()) {
+
             return null;
         }
 
-        int izquierda = 0;
-        int derecha = paquetesOrdenados.size() - 1;
-
-        while (izquierda <= derecha) {
-            int medio = izquierda + (derecha - izquierda) / 2;
-
-            Paquete paqueteMedio = paquetesOrdenados.get(medio);
-
-            int comparacion =
-                    paqueteMedio.getCodigo().compareTo(codigo);
-
-            if (comparacion == 0) {
-                return paqueteMedio;
-            } else if (comparacion < 0) {
-                izquierda = medio + 1;
-            } else {
-                derecha = medio - 1;
-            }
-        }
-
-        return null;
+        return buscarPaquetePorCodigoRecursivo(
+                paquetesOrdenados,
+                codigo,
+                0,
+                paquetesOrdenados.size() - 1
+        );
     }
 
-    // Encuentra recursivamente el paquete de mayor peso
-    // mediante divide y vencerás.
+
+    private Paquete buscarPaquetePorCodigoRecursivo(
+            List<Paquete> paquetesOrdenados,
+            String codigo,
+            int izquierda,
+            int derecha) {
+
+        /*
+         * Caso base:
+         * el intervalo quedó vacío.
+         */
+        if (izquierda > derecha) {
+            return null;
+        }
+
+        int medio =
+                izquierda
+                        + (derecha - izquierda) / 2;
+
+        Paquete paqueteMedio =
+                paquetesOrdenados.get(medio);
+
+        int comparacion =
+                paqueteMedio
+                        .getCodigo()
+                        .compareTo(codigo);
+
+        /*
+         * Se encontró el paquete.
+         */
+        if (comparacion == 0) {
+            return paqueteMedio;
+        }
+
+        /*
+         * El código buscado está a la derecha.
+         */
+        if (comparacion < 0) {
+
+            return buscarPaquetePorCodigoRecursivo(
+                    paquetesOrdenados,
+                    codigo,
+                    medio + 1,
+                    derecha
+            );
+        }
+
+        /*
+         * El código buscado está a la izquierda.
+         */
+        return buscarPaquetePorCodigoRecursivo(
+                paquetesOrdenados,
+                codigo,
+                izquierda,
+                medio - 1
+        );
+    }
+
+
+    // ---------------------------------------------------------
+    // DIVIDE Y VENCERÁS:
+    // PAQUETE DE MAYOR PESO
+    // ---------------------------------------------------------
+
     public Paquete buscarPaqueteMasPesado(
             List<Paquete> paquetes) {
 
-        if (paquetes == null || paquetes.isEmpty()) {
-            return null;
-        }
+        if (paquetes == null ||
+                paquetes.isEmpty()) {
 
-        List<Paquete> validos = new ArrayList<>();
-
-        for (Paquete paquete : paquetes) {
-            if (paquete != null) {
-                validos.add(paquete);
-            }
-        }
-
-        if (validos.isEmpty()) {
             return null;
         }
 
         return buscarMasPesadoRecursivo(
-                validos, 0, validos.size() - 1
+                paquetes,
+                0,
+                paquetes.size() - 1
         );
     }
+
 
     private Paquete buscarMasPesadoRecursivo(
             List<Paquete> paquetes,
             int izquierda,
             int derecha) {
 
-        // Caso base: solo queda un paquete.
+        /*
+         * CASO BASE:
+         *
+         * El subproblema contiene solamente
+         * un paquete.
+         */
         if (izquierda == derecha) {
-            return paquetes.get(izquierda);
+
+            return paquetes.get(
+                    izquierda
+            );
         }
 
-        // Divide el intervalo en dos partes.
-        int medio = izquierda + (derecha - izquierda) / 2;
+        /*
+         * DIVISIÓN:
+         *
+         * Se divide el intervalo aproximadamente
+         * en dos partes.
+         */
+        int medio =
+                izquierda
+                        + (derecha - izquierda) / 2;
 
-        // Resuelve cada mitad recursivamente.
+
+        /*
+         * SUBPROBLEMA IZQUIERDO.
+         */
         Paquete paqueteIzquierdo =
                 buscarMasPesadoRecursivo(
-                        paquetes, izquierda, medio
+                        paquetes,
+                        izquierda,
+                        medio
                 );
 
+
+        /*
+         * SUBPROBLEMA DERECHO.
+         */
         Paquete paqueteDerecho =
                 buscarMasPesadoRecursivo(
-                        paquetes, medio + 1, derecha
+                        paquetes,
+                        medio + 1,
+                        derecha
                 );
 
-        // Combina las soluciones: conserva el de mayor peso.
+
+        /*
+         * COMBINACIÓN:
+         *
+         * Se comparan las soluciones obtenidas
+         * de ambos subproblemas.
+         */
         if (paqueteIzquierdo.getPeso()
                 >= paqueteDerecho.getPeso()) {
+
             return paqueteIzquierdo;
         }
 
