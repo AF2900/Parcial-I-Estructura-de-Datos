@@ -82,37 +82,39 @@ public class GestorRegistro {
             return false;
         }
 
-        // El código debe ser único.
+        // El código del paquete debe ser único.
         if (paquetesPorCodigo.containsKey(
                 paquete.getCodigo())) {
             return false;
         }
 
-        // Conserva el orden de registro.
+        // Conserva el orden exacto de registro.
         paquetesRegistro.add(paquete);
 
-        // Permite búsquedas rápidas por código.
+        // Permite consultar el paquete rápidamente por código.
         paquetesPorCodigo.put(
                 paquete.getCodigo(),
                 paquete
         );
 
-        // Municipio sin duplicados.
+        // Guarda el municipio sin repetir.
         municipios.add(
                 paquete.getDestino()
         );
 
-        // Municipio ordenado y sin duplicados.
+        // Guarda el municipio sin repetir y ordenado.
         municipiosOrdenados.add(
                 paquete.getDestino()
         );
 
-        // Agrupación municipio -> paquetes.
+        // Busca la lista correspondiente al municipio.
         List<Paquete> paquetesMunicipio =
                 paquetesPorMunicipio.get(
                         paquete.getDestino()
                 );
 
+        // Si todavía no existe una lista para ese municipio,
+        // se crea.
         if (paquetesMunicipio == null) {
 
             paquetesMunicipio = new ArrayList<>();
@@ -123,7 +125,180 @@ public class GestorRegistro {
             );
         }
 
+        // Agrega el paquete a la lista de su municipio.
         paquetesMunicipio.add(paquete);
+
+        return true;
+    }
+
+
+    public Paquete buscarPaquete(String codigo) {
+
+        if (codigo == null ||
+                codigo.trim().isEmpty()) {
+            return null;
+        }
+
+        return paquetesPorCodigo.get(codigo);
+    }
+
+
+    public List<Paquete> obtenerPaquetesRegistro() {
+
+        return new ArrayList<>(paquetesRegistro);
+    }
+
+
+    public Set<String> obtenerMunicipios() {
+
+        return new HashSet<>(municipios);
+    }
+
+
+    public Set<String> obtenerMunicipiosOrdenados() {
+
+        return new TreeSet<>(municipiosOrdenados);
+    }
+
+
+    public List<Paquete> obtenerPaquetesPorMunicipio(
+            String municipio) {
+
+        if (municipio == null ||
+                municipio.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Paquete> paquetes =
+                paquetesPorMunicipio.get(municipio);
+
+        if (paquetes == null) {
+            return new ArrayList<>();
+        }
+
+        return new ArrayList<>(paquetes);
+    }
+
+    public boolean registrarRepartidor(Repartidor repartidor) {
+
+        if (repartidor == null) {
+            return false;
+        }
+
+        if (repartidor.getIdentificacion() == null ||
+                repartidor.getIdentificacion().trim().isEmpty()) {
+            return false;
+        }
+
+        if (repartidor.getNombre() == null ||
+                repartidor.getNombre().trim().isEmpty()) {
+            return false;
+        }
+
+        if (repartidor.getZona() == null ||
+                repartidor.getZona().trim().isEmpty()) {
+            return false;
+        }
+
+        // La identificación debe ser única.
+        if (repartidores.containsKey(
+                repartidor.getIdentificacion())) {
+            return false;
+        }
+
+        repartidores.put(
+                repartidor.getIdentificacion(),
+                repartidor
+        );
+
+        return true;
+    }
+
+
+    public Repartidor buscarRepartidor(String identificacion) {
+
+        if (identificacion == null ||
+                identificacion.trim().isEmpty()) {
+            return null;
+        }
+
+        return repartidores.get(identificacion);
+    }
+
+
+    public List<Repartidor> obtenerRepartidores() {
+
+        return new ArrayList<>(repartidores.values());
+    }
+
+
+    public Repartidor asignarRepartidor(Paquete paquete) {
+
+        if (paquete == null) {
+            return null;
+        }
+
+        // El paquete debe estar registrado en el sistema.
+        if (!paquetesPorCodigo.containsKey(
+                paquete.getCodigo())) {
+            return null;
+        }
+
+        // Evita asignar dos veces el mismo paquete.
+        if (asignaciones.containsKey(
+                paquete.getCodigo())) {
+            return null;
+        }
+
+        for (Repartidor repartidor : repartidores.values()) {
+
+            boolean mismaZona =
+                    repartidor.getZona()
+                            .equalsIgnoreCase(
+                                    paquete.getDestino()
+                            );
+
+            if (repartidor.isDisponible() &&
+                    mismaZona) {
+
+                repartidor.setDisponible(false);
+
+                asignaciones.put(
+                        paquete.getCodigo(),
+                        repartidor
+                );
+
+                return repartidor;
+            }
+        }
+
+        return null;
+    }
+
+
+    public Repartidor obtenerRepartidorAsignado(
+            String codigoPaquete) {
+
+        if (codigoPaquete == null ||
+                codigoPaquete.trim().isEmpty()) {
+            return null;
+        }
+
+        return asignaciones.get(codigoPaquete);
+    }
+
+
+    public boolean liberarRepartidor(
+            String identificacion) {
+
+        Repartidor repartidor =
+                buscarRepartidor(identificacion);
+
+        if (repartidor == null) {
+            return false;
+        }
+
+        repartidor.setDisponible(true);
 
         return true;
     }
