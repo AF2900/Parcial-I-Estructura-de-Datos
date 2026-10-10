@@ -1,11 +1,8 @@
-
 package co.edu.uniquindio.poo.service;
 
 import co.edu.uniquindio.poo.comparadores.ComparadorDespacho;
 import co.edu.uniquindio.poo.model.Paquete;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -141,24 +138,23 @@ public class GestorPrioridad {
     }
 
     // Busca un paquete por código mediante búsqueda binaria.
-    // Trabaja sobre una copia para no modificar la lista recibida.
+    // Precondición: la lista ya debe estar ordenada por código
+    // ascendente y no debe contener paquetes ni códigos nulos.
+    // Complejidad: O(log n) comparaciones.
     public Paquete buscarPaquetePorCodigo(
-            List<Paquete> paquetes,
-            String codigo) {
+            List<Paquete> paquetesOrdenados, String codigo) {
 
-        if (paquetes == null || codigo == null) {
+        if (paquetesOrdenados == null || codigo == null) {
             return null;
         }
 
-        List<Paquete> copia = new ArrayList<>(paquetes);
-        Collections.sort(copia);
-
         int izquierda = 0;
-        int derecha = copia.size() - 1;
+        int derecha = paquetesOrdenados.size() - 1;
 
         while (izquierda <= derecha) {
             int medio = izquierda + (derecha - izquierda) / 2;
-            Paquete paqueteMedio = copia.get(medio);
+
+            Paquete paqueteMedio = paquetesOrdenados.get(medio);
 
             int comparacion =
                     paqueteMedio.getCodigo().compareTo(codigo);
