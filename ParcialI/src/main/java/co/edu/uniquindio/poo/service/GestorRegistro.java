@@ -302,4 +302,15 @@ public class GestorRegistro {
 
         return true;
     }
+
+    public boolean tieneRepartidorAsignado(
+            String codigoPaquete) {
+
+        if (codigoPaquete == null ||
+                codigoPaquete.trim().isEmpty()) {
+            return false;
+        }
+
+        return asignaciones.containsKey(codigoPaquete);
+    }
 }
