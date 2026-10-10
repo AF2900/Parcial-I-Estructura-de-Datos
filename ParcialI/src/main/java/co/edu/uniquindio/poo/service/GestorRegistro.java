@@ -13,31 +13,41 @@ import java.util.TreeSet;
 
 public class GestorRegistro {
 
-    // Mantiene los paquetes en el orden exacto en que fueron registrados.
+    // Conserva todos los paquetes en el orden exacto
+    // en que fueron registrados durante la jornada.
     private final List<Paquete> paquetesRegistro;
 
-    // Permite buscar rápidamente un paquete utilizando su código.
+    // Conserva solamente los paquetes que todavía
+    // no han sido entregados.
+    private final List<Paquete> paquetesPendientes;
+
+    // Permite buscar rápidamente un paquete por código.
     private final Map<String, Paquete> paquetesPorCodigo;
 
     // Mantiene los municipios sin elementos repetidos.
     private final Set<String> municipios;
 
-    // Mantiene los municipios sin repetir y ordenados alfabéticamente.
+    // Mantiene los municipios sin repetir
+    // y ordenados alfabéticamente.
     private final Set<String> municipiosOrdenados;
 
     // Relaciona cada municipio con sus paquetes.
     private final Map<String, List<Paquete>> paquetesPorMunicipio;
 
-    // Permite registrar y consultar repartidores por identificación.
+    // Permite registrar y consultar repartidores
+    // mediante su identificación.
     private final Map<String, Repartidor> repartidores;
 
-    // Relaciona el código de un paquete con el repartidor asignado.
+    // Relaciona el código de un paquete
+    // con el repartidor que tiene asignado.
     private final Map<String, Repartidor> asignaciones;
 
 
     public GestorRegistro() {
 
         paquetesRegistro = new ArrayList<>();
+
+        paquetesPendientes = new ArrayList<>();
 
         paquetesPorCodigo = new HashMap<>();
 
@@ -52,6 +62,10 @@ public class GestorRegistro {
         asignaciones = new HashMap<>();
     }
 
+
+    // ---------------------------------------------------------
+    // PAQUETES
+    // ---------------------------------------------------------
 
     public boolean registrarPaquete(Paquete paquete) {
 
@@ -73,6 +87,7 @@ public class GestorRegistro {
             return false;
         }
 
+        // Rango utilizado según aclaración del docente.
         if (paquete.getPrioridad() < 0 ||
                 paquete.getPrioridad() > 5) {
             return false;
@@ -82,39 +97,43 @@ public class GestorRegistro {
             return false;
         }
 
-        // El código del paquete debe ser único.
+        // No pueden existir dos paquetes con el mismo código.
         if (paquetesPorCodigo.containsKey(
                 paquete.getCodigo())) {
             return false;
         }
 
-        // Conserva el orden exacto de registro.
+        // Conserva permanentemente el orden original
+        // de registro de la jornada.
         paquetesRegistro.add(paquete);
 
-        // Permite consultar el paquete rápidamente por código.
+        // Inicialmente todo paquete registrado está pendiente.
+        paquetesPendientes.add(paquete);
+
+        // Asociación código -> Paquete.
         paquetesPorCodigo.put(
                 paquete.getCodigo(),
                 paquete
         );
 
-        // Guarda el municipio sin repetir.
+        // Municipio sin duplicados.
         municipios.add(
                 paquete.getDestino()
         );
 
-        // Guarda el municipio sin repetir y ordenado.
+        // Municipio ordenado y sin duplicados.
         municipiosOrdenados.add(
                 paquete.getDestino()
         );
 
-        // Busca la lista correspondiente al municipio.
+        // Obtiene la lista correspondiente al municipio.
         List<Paquete> paquetesMunicipio =
                 paquetesPorMunicipio.get(
                         paquete.getDestino()
                 );
 
-        // Si todavía no existe una lista para ese municipio,
-        // se crea.
+        // Si es el primer paquete para ese municipio,
+        // se crea su lista.
         if (paquetesMunicipio == null) {
 
             paquetesMunicipio = new ArrayList<>();
@@ -125,7 +144,7 @@ public class GestorRegistro {
             );
         }
 
-        // Agrega el paquete a la lista de su municipio.
+        // Agrega el paquete al municipio correspondiente.
         paquetesMunicipio.add(paquete);
 
         return true;
@@ -148,6 +167,43 @@ public class GestorRegistro {
         return new ArrayList<>(paquetesRegistro);
     }
 
+
+    public List<Paquete> obtenerPaquetesPendientes() {
+
+        return new ArrayList<>(paquetesPendientes);
+    }
+
+
+    public boolean estaPendiente(String codigoPaquete) {
+
+        Paquete paquete =
+                buscarPaquete(codigoPaquete);
+
+        if (paquete == null) {
+            return false;
+        }
+
+        return paquetesPendientes.contains(paquete);
+    }
+
+
+    public boolean retirarPaquetePendiente(
+            String codigoPaquete) {
+
+        Paquete paquete =
+                buscarPaquete(codigoPaquete);
+
+        if (paquete == null) {
+            return false;
+        }
+
+        return paquetesPendientes.remove(paquete);
+    }
+
+
+    // ---------------------------------------------------------
+    // MUNICIPIOS
+    // ---------------------------------------------------------
 
     public Set<String> obtenerMunicipios() {
 
@@ -179,24 +235,36 @@ public class GestorRegistro {
         return new ArrayList<>(paquetes);
     }
 
-    public boolean registrarRepartidor(Repartidor repartidor) {
+
+    // ---------------------------------------------------------
+    // REPARTIDORES
+    // ---------------------------------------------------------
+
+    public boolean registrarRepartidor(
+            Repartidor repartidor) {
 
         if (repartidor == null) {
             return false;
         }
 
         if (repartidor.getIdentificacion() == null ||
-                repartidor.getIdentificacion().trim().isEmpty()) {
+                repartidor.getIdentificacion()
+                        .trim()
+                        .isEmpty()) {
             return false;
         }
 
         if (repartidor.getNombre() == null ||
-                repartidor.getNombre().trim().isEmpty()) {
+                repartidor.getNombre()
+                        .trim()
+                        .isEmpty()) {
             return false;
         }
 
         if (repartidor.getZona() == null ||
-                repartidor.getZona().trim().isEmpty()) {
+                repartidor.getZona()
+                        .trim()
+                        .isEmpty()) {
             return false;
         }
 
@@ -215,7 +283,8 @@ public class GestorRegistro {
     }
 
 
-    public Repartidor buscarRepartidor(String identificacion) {
+    public Repartidor buscarRepartidor(
+            String identificacion) {
 
         if (identificacion == null ||
                 identificacion.trim().isEmpty()) {
@@ -228,29 +297,45 @@ public class GestorRegistro {
 
     public List<Repartidor> obtenerRepartidores() {
 
-        return new ArrayList<>(repartidores.values());
+        return new ArrayList<>(
+                repartidores.values()
+        );
     }
 
 
-    public Repartidor asignarRepartidor(Paquete paquete) {
+    // ---------------------------------------------------------
+    // ASIGNACIONES
+    // ---------------------------------------------------------
+
+    public Repartidor asignarRepartidor(
+            Paquete paquete) {
 
         if (paquete == null) {
             return null;
         }
 
-        // El paquete debe estar registrado en el sistema.
+        // El paquete debe existir en el sistema.
         if (!paquetesPorCodigo.containsKey(
                 paquete.getCodigo())) {
             return null;
         }
 
-        // Evita asignar dos veces el mismo paquete.
+        // No se puede asignar un paquete
+        // que ya no está pendiente.
+        if (!paquetesPendientes.contains(paquete)) {
+            return null;
+        }
+
+        // El paquete no puede tener ya otro repartidor.
         if (asignaciones.containsKey(
                 paquete.getCodigo())) {
             return null;
         }
 
-        for (Repartidor repartidor : repartidores.values()) {
+        // Busca un repartidor disponible
+        // cuya zona coincida con el destino.
+        for (Repartidor repartidor :
+                repartidores.values()) {
 
             boolean mismaZona =
                     repartidor.getZona()
@@ -258,8 +343,8 @@ public class GestorRegistro {
                                     paquete.getDestino()
                             );
 
-            if (repartidor.isDisponible() &&
-                    mismaZona) {
+            if (repartidor.isDisponible()
+                    && mismaZona) {
 
                 repartidor.setDisponible(false);
 
@@ -288,21 +373,6 @@ public class GestorRegistro {
     }
 
 
-    public boolean liberarRepartidor(
-            String identificacion) {
-
-        Repartidor repartidor =
-                buscarRepartidor(identificacion);
-
-        if (repartidor == null) {
-            return false;
-        }
-
-        repartidor.setDisponible(true);
-
-        return true;
-    }
-
     public boolean tieneRepartidorAsignado(
             String codigoPaquete) {
 
@@ -311,6 +381,33 @@ public class GestorRegistro {
             return false;
         }
 
-        return asignaciones.containsKey(codigoPaquete);
+        return asignaciones.containsKey(
+                codigoPaquete
+        );
+    }
+
+
+    public boolean finalizarAsignacion(
+            String codigoPaquete) {
+
+        if (codigoPaquete == null ||
+                codigoPaquete.trim().isEmpty()) {
+            return false;
+        }
+
+        Repartidor repartidor =
+                asignaciones.remove(
+                        codigoPaquete
+                );
+
+        if (repartidor == null) {
+            return false;
+        }
+
+        // Después de terminar la asignación,
+        // el repartidor vuelve a estar disponible.
+        repartidor.setDisponible(true);
+
+        return true;
     }
 }
