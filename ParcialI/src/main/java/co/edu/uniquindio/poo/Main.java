@@ -1,81 +1,79 @@
 package co.edu.uniquindio.poo;
 
+import co.edu.uniquindio.poo.data.DatosIniciales;
 import co.edu.uniquindio.poo.model.Paquete;
 import co.edu.uniquindio.poo.model.Repartidor;
-import co.edu.uniquindio.poo.service.GestorPrioridad;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        Paquete paquete1 = new Paquete(
-                "PQ731", "Armenia", 4.5, 5, 45);
+        System.out.println("=== INICIALIZANDO SISTEMA QUINDÍO EXPRESS ===");
+        QuindioExpress sistema = new QuindioExpress();
 
-        Paquete paquete2 = new Paquete(
-                "PQ105", "Salento", 3.2, 4, 25);
+        // 1. Cargar datos iniciales (30 paquetes y 6 repartidores)
+        DatosIniciales.cargarDatos(sistema);
+        System.out.println("Paquetes registrados inicialmente: " + sistema.obtenerPaquetesRegistro().size());
+        System.out.println("Repartidores registrados: " + sistema.obtenerRepartidores().size());
 
-        Paquete paquete3 = new Paquete(
-                "PQ942", "Calarca", 6.7, 35);
+        // 2. Demostración de municipios destino y ordenados
+        System.out.println("\nMunicipios destino (sin repetir): " + sistema.obtenerMunicipios());
+        System.out.println("Municipios ordenados alfabéticamente: " + sistema.obtenerMunicipiosOrdenados());
 
-        Repartidor repartidor1 = new Repartidor(
-                "R001", "Carlos Gomez", "Armenia", true);
+        // 3. Búsqueda rápida por código (HashMap O(1))
+        String codigoBuscar = "PQ731";
+        Paquete paqueteBuscado = sistema.buscarPaquete(codigoBuscar);
+        System.out.println("\nBúsqueda de " + codigoBuscar + ": " + paqueteBuscado);
 
-        System.out.println("=== DATOS DE PRUEBA ===");
-        System.out.println(paquete1);
-        System.out.println(paquete2);
-        System.out.println(paquete3);
-        System.out.println(repartidor1);
-
-        System.out.println("\n=== COMPARACIÓN NATURAL ===");
-        System.out.println(
-                "Comparación por código: "
-                        + paquete1.compareTo(paquete2));
-
-        GestorPrioridad gestor = new GestorPrioridad();
-
-        gestor.agregarPaquete(paquete1);
-        gestor.agregarPaquete(paquete2);
-        gestor.agregarPaquete(paquete3);
-
-        System.out.println("\n=== ORDEN DE DESPACHO ===");
-
-        while (!gestor.estaVacia()) {
-            Paquete siguiente = gestor.despacharSiguientePaquete();
-            System.out.println(siguiente);
+        // 4. Demostración de paquetes por municipio
+        String municipioConsulta = "Armenia";
+        List<Paquete> paquetesArmenia = sistema.obtenerPaquetesPorMunicipio(municipioConsulta);
+        System.out.println("\nPaquetes en " + municipioConsulta + " (" + paquetesArmenia.size() + "):");
+        for (Paquete p : paquetesArmenia) {
+            System.out.println(" - " + p.getCodigo() + " (Peso: " + p.getPeso() + "kg, Prioridad: " + p.getPrioridad() + ")");
         }
 
-        // Lista de paquetes para demostrar los algoritmos.
-        List<Paquete> paquetes = new ArrayList<>();
-        paquetes.add(paquete1);
-        paquetes.add(paquete2);
-        paquetes.add(paquete3);
+        // 5. Demostración de algoritmos recursivos
+        System.out.println("\n=== ALGORITMOS Y ANÁLISIS ===");
+        double pesoTotalArmenia = sistema.calcularPesoPorDestino(paquetesArmenia, "Armenia");
+        System.out.println("Peso total recursivo para Armenia: " + pesoTotalArmenia + " kg");
 
-        System.out.println("\n=== ALGORITMOS ===");
+        int conteoPrioridad = sistema.contarPaquetesPorPrioridad(sistema.obtenerPaquetesRegistro(), 4);
+        System.out.println("Paquetes con prioridad >= 4: " + conteoPrioridad);
 
-        // 1. Suma recursiva del peso por destino.
-        double pesoArmenia =
-                gestor.calcularPesoPorDestino(paquetes, "Armenia");
-        System.out.println("Peso total para Armenia: " + pesoArmenia);
+        // Búsqueda binaria
+        List<Paquete> ordenadosCodigo = sistema.ordenarPorCodigo(sistema.obtenerPaquetesRegistro());
+        Paquete encontradoBinaria = sistema.buscarPaquetePorCodigo(ordenadosCodigo, "PQ567");
+        System.out.println("Búsqueda binaria de PQ567: " + encontradoBinaria);
 
-        // 2. Conteo recursivo por prioridad mínima.
-        int cantidadPrioridad =
-                gestor.contarPaquetesPorPrioridad(paquetes, 4);
-        System.out.println(
-                "Paquetes con prioridad >= 4: " + cantidadPrioridad);
+        // Divide y vencerás
+        Paquete masPesado = sistema.buscarPaqueteMasPesado(sistema.obtenerPaquetesRegistro());
+        System.out.println("Paquete más pesado (Divide y Vencerás): " + masPesado);
 
-        // 3. Búsqueda binaria por código.
-        List<Paquete> paquetesOrdenados = new ArrayList<>(paquetes);
-        Collections.sort(paquetesOrdenados);
+        // 6. Demostración de asignación y entrega
+        System.out.println("\n=== FLUJO DE ASIGNACIÓN Y ENTREGA ===");
+        Paquete primerPendiente = sistema.obtenerPaquetesPendientes().get(0);
+        System.out.println("Intentando asignar repartidor para el paquete: " + primerPendiente);
 
-        Paquete encontrado =
-                gestor.buscarPaquetePorCodigo(paquetesOrdenados, "PQ105");
-        System.out.println("Búsqueda de PQ105: " + encontrado);
+        Repartidor repartidorAsignado = sistema.asignarRepartidor(primerPendiente);
+        if (repartidorAsignado != null) {
+            System.out.println("Repartidor asignado con éxito: " + repartidorAsignado.getNombre() + " (Zona: " + repartidorAsignado.getZona() + ")");
 
-        // 4. Divide y vencerás: paquete de mayor peso.
-        Paquete masPesado = gestor.buscarPaqueteMasPesado(paquetes);
-        System.out.println("Paquete más pesado: " + masPesado);
+            // Finalizar entrega
+            boolean entregaExitosa = sistema.finalizarEntrega(primerPendiente);
+            if (entregaExitosa) {
+                System.out.println("¡Entrega registrada y finalizada correctamente!");
+            }
+        }
+
+        // 7. Verificación del historial con la lista simplemente enlazada propia
+        System.out.println("\n=== HISTORIAL DE ENTREGAS (Lista Simple Propia) ===");
+        System.out.println("Cantidad de elementos en historial: " + sistema.obtenerHistorialEntregas().tamano());
+        for (Paquete p : sistema.obtenerHistorialEntregas()) {
+            System.out.println("Entregado -> " + p.getCodigo() + " (" + p.getDestino() + ")");
+        }
+
+        System.out.println("\n¡Integración de QuindíoExpress completada con éxito!");
     }
 }

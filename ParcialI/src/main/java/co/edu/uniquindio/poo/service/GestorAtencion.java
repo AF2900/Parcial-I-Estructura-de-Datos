@@ -20,8 +20,19 @@ public class GestorAtencion {
         }
     }
 
+    public Paquete verSiguiente() {
+        return colaLlegada.peek();
+    }
+
     public Paquete atenderSiguiente() {
         return colaLlegada.poll();
+    }
+
+    public boolean eliminarDeCola(Paquete paquete) {
+        if (paquete == null) {
+            return false;
+        }
+        return colaLlegada.remove(paquete);
     }
 
     public void registrarEntrega(Paquete paquete) {
