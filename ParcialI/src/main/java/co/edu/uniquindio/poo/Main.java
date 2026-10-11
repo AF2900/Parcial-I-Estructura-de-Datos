@@ -208,7 +208,132 @@ public class Main {
 
 
         // =====================================================
-        // 8. DEMOSTRACIÓN FIFO
+        // 8. ORDENAMIENTOS
+        // =====================================================
+
+        System.out.println(
+                "\n=== ORDENAMIENTOS ==="
+        );
+
+
+        // -----------------------------------------------------
+        // 8.1 PRIORIDAD DESCENDENTE
+        // -----------------------------------------------------
+
+        List<Paquete> porPrioridad =
+                sistema.ordenarPorPrioridad(
+                        sistema.obtenerPaquetesRegistro()
+                );
+
+        System.out.println(
+                "\nOrden por prioridad "
+                        + "(mayor a menor):"
+        );
+
+        for (int i = 0;
+             i < Math.min(5, porPrioridad.size());
+             i++) {
+
+            Paquete paquete =
+                    porPrioridad.get(i);
+
+            System.out.println(
+                    paquete.getCodigo()
+                            + " | Prioridad: "
+                            + paquete.getPrioridad()
+            );
+        }
+
+
+        // -----------------------------------------------------
+        // 8.2 PESO DESCENDENTE
+        // -----------------------------------------------------
+
+        List<Paquete> porPeso =
+                sistema.ordenarPorPeso(
+                        sistema.obtenerPaquetesRegistro()
+                );
+
+        System.out.println(
+                "\nOrden por peso "
+                        + "(mayor a menor):"
+        );
+
+        for (int i = 0;
+             i < Math.min(5, porPeso.size());
+             i++) {
+
+            Paquete paquete =
+                    porPeso.get(i);
+
+            System.out.println(
+                    paquete.getCodigo()
+                            + " | Peso: "
+                            + paquete.getPeso()
+                            + " kg"
+            );
+        }
+
+
+        // -----------------------------------------------------
+        // 8.3 TIEMPO ASCENDENTE
+        // -----------------------------------------------------
+
+        List<Paquete> porTiempo =
+                sistema.ordenarPorTiempo(
+                        sistema.obtenerPaquetesRegistro()
+                );
+
+        System.out.println(
+                "\nOrden por tiempo estimado "
+                        + "(menor a mayor):"
+        );
+
+        for (int i = 0;
+             i < Math.min(5, porTiempo.size());
+             i++) {
+
+            Paquete paquete =
+                    porTiempo.get(i);
+
+            System.out.println(
+                    paquete.getCodigo()
+                            + " | Tiempo: "
+                            + paquete.getTiempoEstimado()
+                            + " minutos"
+            );
+        }
+
+
+        // -----------------------------------------------------
+        // 8.4 ORDEN NATURAL POR CÓDIGO
+        // -----------------------------------------------------
+
+        List<Paquete> porCodigo =
+                sistema.ordenarPorCodigo(
+                        sistema.obtenerPaquetesRegistro()
+                );
+
+        System.out.println(
+                "\nOrden natural por código "
+                        + "(ascendente):"
+        );
+
+        for (int i = 0;
+             i < Math.min(5, porCodigo.size());
+             i++) {
+
+            Paquete paquete =
+                    porCodigo.get(i);
+
+            System.out.println(
+                    paquete.getCodigo()
+            );
+        }
+
+
+        // =====================================================
+        // 9. DEMOSTRACIÓN FIFO
         // =====================================================
 
         System.out.println(
@@ -272,7 +397,7 @@ public class Main {
 
 
         // =====================================================
-        // 9. DEMOSTRACIÓN PRIORITYQUEUE
+        // 10. DEMOSTRACIÓN PRIORITYQUEUE
         // =====================================================
 
         System.out.println(
@@ -338,7 +463,7 @@ public class Main {
 
 
         // =====================================================
-        // 10. HISTORIAL DE ENTREGAS
+        // 11. HISTORIAL DE ENTREGAS
         // =====================================================
 
         System.out.println(
@@ -367,7 +492,7 @@ public class Main {
 
 
         // =====================================================
-        // 11. VERIFICAR PAQUETES PENDIENTES
+        // 12. ESTADO FINAL
         // =====================================================
 
         System.out.println(
